@@ -4,6 +4,10 @@ import { Signup } from './pages/Signup.jsx'
 import { AuthContextProvider } from './contexts/AuthContext.jsx'
 import { Login } from './pages/Login.jsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { io } from 'socket.io-client'
+import { SocketIOContextProvider } from './contexts/SocketIOContext.jsx'
+
+const socket = io(import.meta.env.VITE_SOCKET_HOST)
 
 const queryClient = new QueryClient()
 
@@ -26,7 +30,9 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
-        <RouterProvider router={router} />
+        <SocketIOContextProvider>
+          <RouterProvider router={router} />
+        </SocketIOContextProvider>
       </AuthContextProvider>
     </QueryClientProvider>
   )

@@ -2,6 +2,8 @@ import { useQueryClient, useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { createRecipe } from '../api/recipes'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import { Socket } from 'socket.io-client'
+import { useSocket } from '../contexts/SocketIOContext.jsx'
 
 export function CreateRecipe() {
   const [title, setTitle] = useState('')
@@ -9,11 +11,18 @@ export function CreateRecipe() {
   const [image, setImage] = useState('')
   const [token] = useAuth()
 
+  const { socket } = useSocket()
   const queryClient = useQueryClient()
 
   const createRecipeMutation = useMutation({
     mutationFn: () => createRecipe(token, { title, ingredientList, image }),
-    onSuccess: () => queryClient.invalidateQueries(['recipes']),
+    onSuccess: (newRecipe) => {
+      ;(queryClient.invalidateQueries(['recipes']),
+        socket.emit('recipe.added', {
+          id: newRecipe._id,
+          title: newRecipe.title,
+        }))
+    },
   })
 
   const handleSubmit = (e) => {
